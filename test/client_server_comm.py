@@ -17,8 +17,13 @@ from skimage.color import rgb2gray
 from skimage import transform
 import pdb
 import numpy as np
+import flask
+from plotly.utils import ImageUriValidator
+import io
 
-app=dash.Dash(__name__)
+server=flask.Flask(__name__)
+
+app=dash.Dash(server=server)
 
 app.layout=html.Div(children=[
     dcc.Store(id='img_array'),
@@ -34,7 +39,8 @@ app.layout=html.Div(children=[
         id='rotate_ccw'),
     html.Div(id='dummy'),
     dcc.Graph(id='graph',figure=plot_common.dummy_fig()),
-    html.Div(id='button1_n_clicks_display')
+    html.Div(id='button1_n_clicks_display'),
+    html.A(id='download',children='Download image',href='/image.png')
     ])
 
 img_array = [None]
@@ -64,6 +70,15 @@ def my_callback(uploader_contents,
         return (plot_common.img_array_to_layout_image_fig(img_array[0]),)
     else:
         return (dash.no_update,)
+
+# pil_image_to_uri seems to encode as png always (currently)
+@server.route('/image.png')
+def provide_image():
+    if img_array[0] is not None:
+        mime,byt=plot_common.img_array_to_mime_bytes(img_array[0])
+        return flask.send_file(io.BytesIO(byt),mimetype=mime)
+    else:
+        return "<b>No image to download!</b>"
 
 if __name__ == '__main__':
     #img_array = np.array([[1, 2]])

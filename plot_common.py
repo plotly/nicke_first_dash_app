@@ -5,6 +5,7 @@ import numpy as np
 import pdb
 import plotly.graph_objects as go
 import skimage.util
+from plotly.utils import ImageUriValidator
 
 def path_to_img_ndarray(path):
     with open(path,'rb') as fp:
@@ -47,10 +48,14 @@ def dummy_fig():
         zeroline=False)
     return fig
 
-def img_array_to_layout_image_fig(ia):
-    """ Returns a figure containing a layout image for faster rendering in the browser. """
+def img_array_to_pil_image(ia):
     ia=skimage.util.img_as_ubyte(ia)
     img = PIL.Image.fromarray(ia)
+    return img
+
+def img_array_to_layout_image_fig(ia):
+    """ Returns a figure containing a layout image for faster rendering in the browser. """
+    img=img_array_to_pil_image(ia)
     width, height = img.size
 
     fig=dummy_fig()
@@ -67,3 +72,11 @@ def img_array_to_layout_image_fig(ia):
     fig.update_yaxes(showgrid=False, range=(height, 0))
     return fig
 
+def img_array_to_mime_bytes(img_array):
+    imgf = img_array_to_pil_image(img_array)
+    uri=ImageUriValidator.pil_image_to_uri(imgf)
+    mime,contents=uri.split(';')
+    typ,cont=contents.split(',')
+    byt=base64.b64decode(cont)
+    return (mime,byt)
+    

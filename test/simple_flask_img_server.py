@@ -3,8 +3,8 @@
 import flask
 import PIL.Image
 import plotly
-from plotly.utils import ImageUriValidator
 import pdb
+from plotly.utils import ImageUriValidator
 import io
 import base64
 
