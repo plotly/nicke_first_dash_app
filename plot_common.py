@@ -34,3 +34,36 @@ def str_to_img_trace(s):
 def base64_to_img_trace(data):
     decoded_img=base64.b64decode(data)
     return str_to_img_trace(decoded_img)
+
+def dummy_fig():
+    fig=go.Figure(go.Scatter(x=[],y=[]))
+    fig.update_layout(template=None)
+    fig.update_xaxes(showgrid=False,
+        showticklabels=False,
+        zeroline=False)
+    fig.update_yaxes(showgrid=False,
+        scaleanchor='x',
+        showticklabels=False,
+        zeroline=False)
+    return fig
+
+def img_array_to_layout_image_fig(ia):
+    """ Returns a figure containing a layout image for faster rendering in the browser. """
+    ia=skimage.util.img_as_ubyte(ia)
+    img = PIL.Image.fromarray(ia)
+    width, height = img.size
+
+    fig=dummy_fig()
+    fig.add_layout_image(dict(source=img,
+                              xref="x",
+                              yref="y",
+                              x=0,
+                              y=0,
+                              sizex=width,
+                              sizey=height,
+                              sizing="contain",
+                              layer="below"))
+    fig.update_xaxes(showgrid=False, range=(0, width))
+    fig.update_yaxes(showgrid=False, range=(height, 0))
+    return fig
+
