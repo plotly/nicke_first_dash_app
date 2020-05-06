@@ -66,7 +66,7 @@ class image_mod_cb:
             img_array=skimage.transform.rotate(
                 img_array,-90,resize=True)
         elif changed_id == 'rotate_ccw.n_clicks':
-            img_array=img_transform.rotate(
+            img_array=skimage.transform.rotate(
                 img_array,90,resize=True)
         if img_array is not None:
             img_trace=go.Image(z=img_array,zmax=[1,1,1,1])
