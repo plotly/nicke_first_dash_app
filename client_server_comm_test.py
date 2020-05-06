@@ -14,7 +14,7 @@ import time
 import plot_common
 import plotly.graph_objects as go
 from skimage.color import rgb2gray
-import skimage.transform
+from skimage import transform
 import pdb
 import numpy as np
 
@@ -39,39 +39,35 @@ app.layout=html.Div(children=[
     html.Div(id='button1_n_clicks_display')
     ])
 
-img_array=np.array([])
+img_array = [np.array([[1, 2], [2, 3]])]
 
-class image_mod_cb:
-    """ This is a little funny because it's static. """
-    @app.callback(
-        [dash.dependencies.Output('graph','figure')],
-        [dash.dependencies.Input('uploader','contents'),
-         dash.dependencies.Input('rotate_cw','n_clicks'),
-         dash.dependencies.Input('rotate_ccw','n_clicks')])
-    def __call__(uploader_contents,
-                 rotate_cw_n_clicks,
-                 rotate_ccw_n_clicks):
-        try:
-            img_array=img_array
-        except NameError:
-            img_array=None
-        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-        if changed_id == 'uploader.contents':
-            if (uploader_contents is not None) and (len(uploader_contents) > 0):
-                # just take first image for now
-                c=uploader_contents[0]
-                t,s=c.split(',')
-                img_array=plot_common.base64_to_img_array(s)
-        elif changed_id == 'rotate_cw.n_clicks':
-            img_array=skimage.transform.rotate(
-                img_array,-90,resize=True)
-        elif changed_id == 'rotate_ccw.n_clicks':
-            img_array=img_transform.rotate(
-                img_array,90,resize=True)
-        if img_array is not None:
-            img_trace=go.Image(z=img_array,zmax=[1,1,1,1])
-            return (go.Figure(data=img_trace),)
-        return dash.no_update
-    
+@app.callback(
+    [dash.dependencies.Output('graph','figure')],
+    [dash.dependencies.Input('uploader','contents'),
+        dash.dependencies.Input('rotate_cw','n_clicks'),
+        dash.dependencies.Input('rotate_ccw','n_clicks')])
+def my_callback(uploader_contents,
+                rotate_cw_n_clicks,
+                rotate_ccw_n_clicks):
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    if changed_id == 'uploader.contents':
+        if (uploader_contents is not None) and (len(uploader_contents) > 0):
+            # just take first image for now
+            c=uploader_contents[0]
+            t,s=c.split(',')
+            img_array[0]=plot_common.base64_to_img_array(s)
+    elif changed_id == 'rotate_cw.n_clicks' and img_array[0].size > 20:
+        img_array[0]=transform.rotate(
+            img_array[0],-90,resize=True)
+    elif changed_id == 'rotate_ccw.n_clicks' and img_array[0].size > 20:
+        img_array[0]=transform.rotate(
+            img_array[0],90,resize=True)
+    else:
+        return (dash.no_update,)
+    img_trace=go.Image(z=img_array[0],zmax=[1,1,1,1])
+    return (go.Figure(data=img_trace),)
+
+
 if __name__ == '__main__':
-    app.run_server(debug=True,threaded=False)
+    #img_array = np.array([[1, 2]])
+    app.run_server(debug=True, port=8051)
