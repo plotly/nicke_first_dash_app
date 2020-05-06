@@ -1,1 +1,1 @@
-web: PYTHONPATH=. python test/client_server_comm.py
+web: PYTHONPATH=.:test gunicorn client_server_comm:server
