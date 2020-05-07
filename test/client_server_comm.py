@@ -21,6 +21,7 @@ import flask
 from plotly.utils import ImageUriValidator
 import io
 import os
+import uuid
 
 server=flask.Flask(__name__)
 
@@ -41,8 +42,18 @@ app.layout=html.Div(children=[
     html.Div(id='dummy'),
     dcc.Graph(id='graph',figure=plot_common.dummy_fig()),
     html.Div(id='button1_n_clicks_display'),
-    html.A(id='download',children='Download image',href='/image.png')
+    html.A(id='download',children='Download image',href='/0000.png')
     ])
+
+@app.callback(
+    [dash.dependencies.Output('download','href')],
+    [dash.dependencies.Input('download','n_clicks')])
+def update_image_num(download_n_clicks):
+    """
+    This is used simply to update the href so that browsers don't just use a
+    cached image.
+    """
+    return ("/%s.png" % (uuid.uuid4().hex,),)
 
 img_array = [None]
 
@@ -54,7 +65,7 @@ img_array = [None]
 def my_callback(uploader_contents,
                 rotate_cw_n_clicks,
                 rotate_ccw_n_clicks):
-    print('procid: %d, img_array id: %#x' % (os.getpid(),id(img_array),))
+    print('my_callback: procid: %d, img_array id: %#x' % (os.getpid(),id(img_array),))
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     if changed_id == 'uploader.contents':
         if (uploader_contents is not None) and (len(uploader_contents) > 0):
@@ -74,8 +85,11 @@ def my_callback(uploader_contents,
         return (dash.no_update,)
 
 # pil_image_to_uri seems to encode as png always (currently)
-@server.route('/image.png')
-def provide_image():
+@server.route('/<somehash>.png')
+def provide_image(somehash):
+    # Just ignore somehash and provide the image in memory, this is just to
+    # avoid caching by browsers
+    print('provide_image: procid: %d, img_array id: %#x' % (os.getpid(),id(img_array),))
     if img_array[0] is not None:
         mime,byt=plot_common.img_array_to_mime_bytes(img_array[0])
         return flask.send_file(io.BytesIO(byt),mimetype=mime)
