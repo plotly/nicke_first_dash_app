@@ -20,6 +20,7 @@ import numpy as np
 import flask
 from plotly.utils import ImageUriValidator
 import io
+import os
 
 server=flask.Flask(__name__)
 
@@ -53,6 +54,7 @@ img_array = [None]
 def my_callback(uploader_contents,
                 rotate_cw_n_clicks,
                 rotate_ccw_n_clicks):
+    print('procid: %d, img_array id: %#x' % (os.getpid(),id(img_array),))
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     if changed_id == 'uploader.contents':
         if (uploader_contents is not None) and (len(uploader_contents) > 0):
@@ -81,5 +83,4 @@ def provide_image():
         return "<b>No image to download!</b>"
 
 if __name__ == '__main__':
-    #img_array = np.array([[1, 2]])
-    app.run_server(threaded=False, port=8051)
+    app.run_server(port=8051)
