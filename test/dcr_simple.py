@@ -13,51 +13,33 @@ app.layout=html.Div(children=[
     html.Div(id='countdisplay',children='0')
 ])
 
-#cb_router=dash_cb_router.DashCallbackRouter()
-#
-#def inc_counter(inputs,states,context):
-#    button_increment_nclicks=inputs[0]
-#    countdisplay_children=inputs[1]
-#    n=int(countdisplay_children)+1
-#    return [str(n)]
-#
-#def dec_counter(inputs,states,context):
-#    button_increment_nclicks=inputs[0]
-#    countdisplay_children=inputs[1]
-#    n=int(countdisplay_children)-1
-#    return [str(n)]
-#
-#cb_router.add_cb(
-#    ['countdisplay.children'],
-#    ['button-increment.nclicks','countdisplay.children'],
-#    [],
-#    'button_increment.nclicks',
-#    inc_counter)
-#
-#cb_router.add_cb(
-#    ['countdisplay.children'],
-#    ['button-decrement.nclicks','countdisplay.children'],
-#    [],
-#    'button_decrement.nclicks',
-#    dec_counter)
-#
-#app.callback=dash_cb_router.register_cbs_with_app(cb_router,app)
+cb_router=dash_cb_router.DashCallbackRouter()
 
-#@app.callback(
-#    [dash.dependencies.Output('countdisplay','children')],
-#    [dash.dependencies.Input('button-increment','n_clicks')],
-#    [dash.dependencies.State('countdisplay','children')])
-@app.callback(
-    [dash.dependencies.Output('countdisplay','children')],
-    [dash.dependencies.Input('button-increment','n_clicks'),
-     dash.dependencies.Input('countdisplay','children')],
-    )
-#@app.callback(
-#    [dash.dependencies.Output('button-increment','value')],
-#    [dash.dependencies.Input('button-increment','n_clicks')])
-def inc_counter(button_increment_nclicks,old_child):
-    n=int(old_child)
-    return (str(n+1),)
+def inc_counter(input,states):
+    button_increment_nclicks=input
+    countdisplay_children=states[0]
+    n=int(countdisplay_children)+1
+    return [str(n)]
+
+def dec_counter(input,states):
+    button_increment_nclicks=input
+    countdisplay_children=states[0]
+    n=int(countdisplay_children)-1
+    return [str(n)]
+
+cb_router.add_cb(
+    ['countdisplay.children'],
+    'button-increment.n_clicks',
+    ['countdisplay.children'],
+    inc_counter)
+
+cb_router.add_cb(
+    ['countdisplay.children'],
+    'button-decrement.n_clicks',
+    ['countdisplay.children'],
+    dec_counter)
+
+app.callback=dash_cb_router.register_cbs_with_app(cb_router,app)
 
 if __name__ == '__main__':
     app.run_server(port=8051)
