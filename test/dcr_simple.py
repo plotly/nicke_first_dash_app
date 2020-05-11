@@ -4,6 +4,7 @@ import dash
 import dash_html_components as html
 import dash_core_components as dcc
 import dash_cb_router
+import pdb
 
 app=dash.Dash(__name__)
 
@@ -39,7 +40,8 @@ cb_router.add_cb(
     ['countdisplay.children'],
     dec_counter)
 
-app.callback=dash_cb_router.register_cbs_with_app(cb_router,app)
+dash_cb_router.register_cbs_with_app(cb_router,app)
 
 if __name__ == '__main__':
+    pdb.set_trace()
     app.run_server(port=8051)
